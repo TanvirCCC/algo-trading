@@ -19,6 +19,18 @@ from datetime import datetime, timezone, timedelta
 from live.config import *
 from data.news_calendar import get_high_impact_events
 
+# ── Supabase client (cloud) ───────────────────────────────────────────────────
+def _supabase():
+    try:
+        from supabase import create_client
+        url = st.secrets.get("SUPABASE_URL", "")
+        key = st.secrets.get("SUPABASE_KEY", "")
+        if url and key:
+            return create_client(url, key)
+    except Exception:
+        pass
+    return None
+
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -43,56 +55,92 @@ div[data-testid="metric-container"] { background:#1e1e2e; border-radius:8px; pad
 
 @st.cache_data(ttl=DASHBOARD_REFRESH_SEC)
 def load_signals() -> pd.DataFrame:
-    if not SIGNAL_FILE.exists():
-        return pd.DataFrame()
+    # Try local CSV first
+    if SIGNAL_FILE.exists():
+        try:
+            df = pd.read_csv(SIGNAL_FILE, parse_dates=["timestamp"])
+            return df.sort_values("timestamp", ascending=False).reset_index(drop=True)
+        except Exception:
+            pass
+    # Fallback: Supabase
     try:
-        df = pd.read_csv(SIGNAL_FILE, parse_dates=["timestamp"])
-        return df.sort_values("timestamp", ascending=False).reset_index(drop=True)
+        sb = _supabase()
+        if sb:
+            res = sb.table("signals").select("*").order("timestamp", desc=True).limit(200).execute()
+            if res.data:
+                return pd.DataFrame(res.data)
     except Exception:
-        return pd.DataFrame()
+        pass
+    return pd.DataFrame()
 
 
 @st.cache_data(ttl=DASHBOARD_REFRESH_SEC)
 def load_trades() -> pd.DataFrame:
-    if not TRADES_FILE.exists():
-        return pd.DataFrame()
+    if TRADES_FILE.exists():
+        try:
+            df = pd.read_csv(TRADES_FILE)
+            open_rows  = df[df["status"] == "OPEN"].copy()
+            close_rows = df[df["status"].isin(["WIN","LOSS"])].copy()
+            if open_rows.empty:
+                return pd.DataFrame()
+            open_rows  = open_rows.set_index("ticket")
+            close_rows = close_rows.set_index("ticket") if not close_rows.empty else pd.DataFrame()
+            merged = open_rows.join(close_rows, rsuffix="_close", how="left") if not close_rows.empty else open_rows.copy()
+            return merged.reset_index()
+        except Exception:
+            pass
+    # Fallback: Supabase
     try:
-        df = pd.read_csv(TRADES_FILE)
-        open_rows  = df[df["status"] == "OPEN"].copy()
-        close_rows = df[df["status"].isin(["WIN","LOSS"])].copy()
-        if open_rows.empty:
-            return pd.DataFrame()
-        open_rows  = open_rows.set_index("ticket")
-        close_rows = close_rows.set_index("ticket") if not close_rows.empty else pd.DataFrame()
-        if not close_rows.empty:
-            merged = open_rows.join(close_rows, rsuffix="_close", how="left")
-        else:
-            merged = open_rows.copy()
-        return merged.reset_index()
+        sb = _supabase()
+        if sb:
+            res = sb.table("trades").select("*").order("timestamp", desc=True).limit(100).execute()
+            if res.data:
+                return pd.DataFrame(res.data)
     except Exception:
-        return pd.DataFrame()
+        pass
+    return pd.DataFrame()
 
 
 @st.cache_data(ttl=DASHBOARD_REFRESH_SEC)
 def load_equity() -> pd.DataFrame:
-    if not EQUITY_HISTORY_FILE.exists():
-        return pd.DataFrame(columns=["timestamp", "equity"])
+    if EQUITY_HISTORY_FILE.exists():
+        try:
+            df = pd.read_csv(EQUITY_HISTORY_FILE, parse_dates=["timestamp"])
+            return df.sort_values("timestamp").reset_index(drop=True)
+        except Exception:
+            pass
+    # Fallback: Supabase
     try:
-        df = pd.read_csv(EQUITY_HISTORY_FILE, parse_dates=["timestamp"])
-        return df.sort_values("timestamp").reset_index(drop=True)
+        sb = _supabase()
+        if sb:
+            res = sb.table("equity_history").select("*").order("timestamp").execute()
+            if res.data:
+                df = pd.DataFrame(res.data)
+                df["timestamp"] = pd.to_datetime(df["timestamp"])
+                return df.sort_values("timestamp").reset_index(drop=True)
     except Exception:
-        return pd.DataFrame(columns=["timestamp", "equity"])
+        pass
+    return pd.DataFrame(columns=["timestamp", "equity"])
 
 
 @st.cache_data(ttl=DASHBOARD_REFRESH_SEC)
 def load_status() -> dict:
-    if not STATUS_FILE.exists():
-        return {"state": "OFFLINE", "equity": INITIAL_EQUITY, "spread": 0, "timestamp": "—"}
+    if STATUS_FILE.exists():
+        try:
+            df = pd.read_csv(STATUS_FILE)
+            return df.iloc[-1].to_dict()
+        except Exception:
+            pass
+    # Fallback: Supabase
     try:
-        df = pd.read_csv(STATUS_FILE)
-        return df.iloc[-1].to_dict()
+        sb = _supabase()
+        if sb:
+            res = sb.table("status").select("*").eq("id", 1).execute()
+            if res.data:
+                return res.data[0]
     except Exception:
-        return {"state": "OFFLINE", "equity": INITIAL_EQUITY, "spread": 0, "timestamp": "—"}
+        pass
+    return {"state": "OFFLINE", "equity": INITIAL_EQUITY, "spread": 0, "timestamp": "—"}
 
 
 @st.cache_data(ttl=300)

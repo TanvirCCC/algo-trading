@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from live.config import *
+from live.supabase_sync import push_signal, push_equity, push_status
 from data.news_calendar import get_high_impact_events, mark_news_windows
 from detectors.seasonality import add_seasonal_columns
 from detectors.regime import cusum_events
@@ -103,6 +104,7 @@ def _write_signal(sig_id: int, signal) -> None:
     }])
     header = not SIGNAL_FILE.exists()
     row.to_csv(SIGNAL_FILE, mode="a", header=header, index=False)
+    push_signal(sig_id, signal)
     log.info(f"Signal written: id={sig_id} {signal.direction} {signal.zone_type} "
              f"entry={signal.entry:.2f} sl={signal.stop:.2f} tp={signal.target:.2f} "
              f"rr={signal.risk_reward:.1f} conf={signal.confidence}")
@@ -114,6 +116,7 @@ def _update_equity_history(equity: float) -> None:
     row = pd.DataFrame([{"timestamp": datetime.now(timezone.utc), "equity": equity}])
     header = not EQUITY_HISTORY_FILE.exists()
     row.to_csv(EQUITY_HISTORY_FILE, mode="a", header=header, index=False)
+    push_equity(equity)
 
 
 def _read_equity_from_status() -> float:

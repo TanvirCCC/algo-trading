@@ -5,3 +5,4 @@ numpy==1.26.4
 scikit-learn==1.5.1
 requests==2.32.3
 pyarrow
+supabase>=2.0.0

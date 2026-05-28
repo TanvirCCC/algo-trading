@@ -7,3 +7,4 @@ live/signal_engine.log
 data/historical/
 Bloomberg Data/
 .DS_Store
+.streamlit/secrets.toml
