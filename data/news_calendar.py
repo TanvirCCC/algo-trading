@@ -18,7 +18,11 @@ from pathlib import Path
 import pandas as pd
 
 _CACHE_DIR = Path("data/news_cache")
-_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    _CACHE_DIR = Path("/tmp/news_cache")
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── FOMC decision dates (Wednesday 14:00 ET = 19:00 UTC) ─────────────────────
 _FOMC_DATES = [

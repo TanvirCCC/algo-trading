@@ -16,8 +16,23 @@ from plotly.subplots import make_subplots
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
-from live.config import *
-from data.news_calendar import get_high_impact_events
+try:
+    from live.config import *
+except Exception:
+    from pathlib import Path as _P
+    SYMBOL = "GOLD"; ASSET_LABEL = "Gold"; INITIAL_EQUITY = 10_000.0
+    DEFAULT_RISK_PCT = 0.005; HIGH_CONF_RISK = 0.010; DAILY_LOSS_LIMIT = 0.02
+    MIN_RR = 2.0; ZONE_LOOKBACK = 50; ML_THRESHOLD = 0.60; MIN_CONFIDENCE = 1
+    DASHBOARD_REFRESH_SEC = 30; SCAN_INTERVAL_SEC = 60
+    BRIDGE_DIR = _P("/tmp/bridge"); SIGNAL_FILE = BRIDGE_DIR / "lnterqo_signals.csv"
+    TRADES_FILE = BRIDGE_DIR / "lnterqo_trades.csv"; BARS_5M_FILE = BRIDGE_DIR / "gold_5m_live.csv"
+    STATUS_FILE = BRIDGE_DIR / "lnterqo_status.csv"; EQUITY_HISTORY_FILE = _P("live/equity_history.csv")
+
+try:
+    from data.news_calendar import get_high_impact_events
+except Exception:
+    def get_high_impact_events(*_a, **_kw):
+        return []
 
 # ── Supabase client (cloud) ───────────────────────────────────────────────────
 def _supabase():
