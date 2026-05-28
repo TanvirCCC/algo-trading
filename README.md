@@ -1,4 +1,4 @@
-# lnterqo v3
+# Quantitative Gold Trading System
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.52-FF4B4B?logo=streamlit&logoColor=white)
@@ -39,7 +39,7 @@ All performance is measured in **R-multiples** — units of risk normalised by s
 
 $$\text{EV} = p_w \cdot \bar{R}_w + (1 - p_w) \cdot \bar{R}_l$$
 
-where $p_w$ is win rate, $\bar{R}_w$ is mean win in R, and $\bar{R}_l$ is mean loss in R (negative). For lnterqo v3: $EV = 0.394 \times 5.41 + 0.606 \times (-1.0) = +2.13R$.
+where $p_w$ is win rate, $\bar{R}_w$ is mean win in R, and $\bar{R}_l$ is mean loss in R (negative). For this system: $EV = 0.394 \times 5.41 + 0.606 \times (-1.0) = +2.13R$.
 
 A positive EV is necessary but not sufficient — the **distribution** of outcomes matters. A strategy with EV = +0.5R but high variance can still blow up on any given run.
 
@@ -84,7 +84,7 @@ Result: **99.7% pass rate** on FTMO 100k challenge structure (6% target, 4% max 
 
 ### 4. CUSUM Regime Detection
 
-To avoid trading in low-quality market conditions, lnterqo uses a **Cumulative Sum (CUSUM)** detector — a sequential change-point detection algorithm from statistical process control (Page, 1954):
+To avoid trading in low-quality market conditions, the system uses a **Cumulative Sum (CUSUM)** detector — a sequential change-point detection algorithm from statistical process control (Page, 1954):
 
 $$S_t^+ = \max(0,\; S_{t-1}^+ + r_t - k), \quad S_0^+ = 0$$
 $$S_t^- = \max(0,\; S_{t-1}^- - r_t - k), \quad S_0^- = 0$$

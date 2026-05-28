@@ -1,5 +1,5 @@
 """
-lnterqo v3 — Live Trading Dashboard
+Quantitative Gold Trading System — Live Dashboard
 =====================================
 Run with:  streamlit run dashboard/app.py
 """
@@ -22,7 +22,7 @@ from data.news_calendar import get_high_impact_events
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="lnterqo v3 | Live Dashboard",
+    page_title="QGTS | Live Dashboard",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -726,8 +726,8 @@ def open_position_chart(signals_df: pd.DataFrame, current_price: float) -> go.Fi
 # ── Main dashboard layout ─────────────────────────────────────────────────────
 
 def main():
-    st.title("📊 lnterqo v3 — Live Trading Dashboard")
-    st.caption(f"Strategy: lnterqo v3 (Rolling WFV · Fixed Risk · ML Filter) · {SYMBOL} · Auto-refresh {DASHBOARD_REFRESH_SEC}s")
+    st.title("📊 Quantitative Gold Trading System — Live Dashboard")
+    st.caption(f"Strategy: Quantitative Gold Trading System (Rolling WFV · Fixed Risk · ML Filter) · {SYMBOL} · Auto-refresh {DASHBOARD_REFRESH_SEC}s")
 
     st.markdown(
         f'<meta http-equiv="refresh" content="{DASHBOARD_REFRESH_SEC}">',
@@ -963,7 +963,7 @@ def main():
 
     # ── Sidebar ───────────────────────────────────────────────────────────────
     with st.sidebar:
-        st.header("lnterqo v3")
+        st.header("QGTS")
         st.markdown(f"""
 **Strategy:** Rolling WFV + ML
 **Symbol:** `{SYMBOL}`
