@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*.parquet
+*.log
+live/equity_history.csv
+live/signal_engine.log
+data/historical/
+Bloomberg Data/
+.DS_Store

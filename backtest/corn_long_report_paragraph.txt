@@ -1,0 +1,4 @@
+We back-tested our false-breakout and gap-fill entry rules on Corn using daily OHLCV data from 2010-01-01 to present (4118 trading days). The strategy generated 33 trade setups over this period (2.1 trades per year). Win rate: 42.4%. Expectancy: +0.273R per trade. Profit factor: 1.6. Sharpe ratio (annualised): 2.87. Sortino ratio: 9.56. CAGR: 0.81%. Calmar ratio: 0.15. Maximum drawdown: -5.41%. Max consecutive losses: 5. Total return: 13.41% on £10,000 initial equity.
+
+Statistical Validation:
+Bootstrap 95% CI on EV: [-0.2727R, +0.8182R]. Null model p-value: 0.1885. IC: nan. Timing IS NOT significant vs random entry.

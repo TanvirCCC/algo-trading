@@ -1,0 +1,4 @@
+We back-tested our false-breakout and gap-fill entry rules on Gold using daily OHLCV data from 2010-01-01 to present (4120 trading days). The strategy generated 31 trade setups over this period (2.0 trades per year). Win rate: 51.6%. Expectancy: +0.548R per trade. Profit factor: 2.14. Sharpe ratio (annualised): 4.93. Sortino ratio: 19.51. CAGR: 1.42%. Calmar ratio: 0.19. Maximum drawdown: -7.34%. Max consecutive losses: 3. Total return: 24.7% on £10,000 initial equity.
+
+Statistical Validation:
+Bootstrap 95% CI on EV: [+0.0621R, +1.0323R]. Null model p-value: 0.1205. IC: nan. Timing IS NOT significant vs random entry.
