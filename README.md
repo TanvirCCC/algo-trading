@@ -8,7 +8,7 @@
 
 **Systematic intraday trading system for Gold (XAUUSD).** Translates Smart Money Concepts (institutional order flow) into a fully quantified, ML-filtered signal pipeline deployed via a MetaTrader 4 Expert Advisor. Validated with rolling walk-forward analysis across six independent out-of-sample years.
 
-**[→ Live Dashboard](https://tanvirccc-algo-trading-dashboard-app.streamlit.app)**
+**[→ Live Dashboard](https://tanvirccc-gold-strat.streamlit.app)**
 
 ---
 
