@@ -1,8 +1,8 @@
-streamlit==1.52.2
-plotly==5.24.1
-pandas==2.2.2
-numpy==1.26.4
-scikit-learn==1.5.1
-requests==2.32.3
-pyarrow
+streamlit>=1.40.0
+plotly>=5.20.0
+pandas>=2.0.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+requests>=2.31.0
+pyarrow>=14.0.0
 supabase>=2.0.0
