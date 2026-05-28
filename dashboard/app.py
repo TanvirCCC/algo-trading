@@ -34,17 +34,29 @@ except Exception:
     def get_high_impact_events(*_a, **_kw):
         return []
 
-# ── Supabase client (cloud) ───────────────────────────────────────────────────
-def _supabase():
+# ── Supabase — direct HTTP (bypasses supabase-py JWT parsing issues) ──────────
+def _sb_select(table: str, order: str = None, limit: int = None, eq: dict = None) -> list:
     try:
-        from supabase import create_client
+        import requests as _req
         url = st.secrets.get("SUPABASE_URL", "")
         key = st.secrets.get("SUPABASE_KEY", "")
-        if url and key:
-            return create_client(url, key)
+        if not url or not key:
+            return []
+        headers = {"apikey": key, "Authorization": f"Bearer {key}"}
+        params = {}
+        if order:
+            params["order"] = order
+        if limit:
+            params["limit"] = str(limit)
+        if eq:
+            for col, val in eq.items():
+                params[col] = f"eq.{val}"
+        r = _req.get(f"{url}/rest/v1/{table}", headers=headers, params=params, timeout=10)
+        if r.status_code == 200:
+            return r.json()
     except Exception:
         pass
-    return None
+    return []
 
 
 # ── Page config ───────────────────────────────────────────────────────────────
@@ -78,14 +90,9 @@ def load_signals() -> pd.DataFrame:
         except Exception:
             pass
     # Fallback: Supabase
-    try:
-        sb = _supabase()
-        if sb:
-            res = sb.table("signals").select("*").order("timestamp", desc=True).limit(200).execute()
-            if res.data:
-                return pd.DataFrame(res.data)
-    except Exception:
-        pass
+    rows = _sb_select("signals", order="timestamp.desc", limit=200)
+    if rows:
+        return pd.DataFrame(rows)
     return pd.DataFrame()
 
 
@@ -105,14 +112,9 @@ def load_trades() -> pd.DataFrame:
         except Exception:
             pass
     # Fallback: Supabase
-    try:
-        sb = _supabase()
-        if sb:
-            res = sb.table("trades").select("*").order("timestamp", desc=True).limit(100).execute()
-            if res.data:
-                return pd.DataFrame(res.data)
-    except Exception:
-        pass
+    rows = _sb_select("trades", order="timestamp.desc", limit=100)
+    if rows:
+        return pd.DataFrame(rows)
     return pd.DataFrame()
 
 
@@ -125,16 +127,11 @@ def load_equity() -> pd.DataFrame:
         except Exception:
             pass
     # Fallback: Supabase
-    try:
-        sb = _supabase()
-        if sb:
-            res = sb.table("equity_history").select("*").order("timestamp").execute()
-            if res.data:
-                df = pd.DataFrame(res.data)
-                df["timestamp"] = pd.to_datetime(df["timestamp"])
-                return df.sort_values("timestamp").reset_index(drop=True)
-    except Exception:
-        pass
+    rows = _sb_select("equity_history", order="timestamp")
+    if rows:
+        df = pd.DataFrame(rows)
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        return df.sort_values("timestamp").reset_index(drop=True)
     return pd.DataFrame(columns=["timestamp", "equity"])
 
 
@@ -147,14 +144,9 @@ def load_status() -> dict:
         except Exception:
             pass
     # Fallback: Supabase
-    try:
-        sb = _supabase()
-        if sb:
-            res = sb.table("status").select("*").eq("id", 1).execute()
-            if res.data:
-                return res.data[0]
-    except Exception:
-        pass
+    rows = _sb_select("status", eq={"id": 1})
+    if rows:
+        return rows[0]
     return {"state": "OFFLINE", "equity": INITIAL_EQUITY, "spread": 0, "timestamp": "—"}
 
 
