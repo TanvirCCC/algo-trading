@@ -242,6 +242,15 @@ def main():
                 rm.equity = live_equity
                 _update_equity_history(live_equity)
 
+            # Push heartbeat to Supabase so dashboard shows RUNNING
+            _spread = 0.0
+            if STATUS_FILE.exists():
+                try:
+                    _spread = float(pd.read_csv(STATUS_FILE)["spread"].iloc[-1])
+                except Exception:
+                    pass
+            push_status("RUNNING", SYMBOL, rm.equity, _spread)
+
             # Only scan during sessions
             if not _in_session():
                 time.sleep(SCAN_INTERVAL_SEC)
